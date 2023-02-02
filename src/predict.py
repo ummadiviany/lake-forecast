@@ -6,6 +6,9 @@ from torch.utils.data import DataLoader, Dataset
 from glob import glob
 from skimage.metrics import *
 
+# Timing
+start = time.time()
+
 # Take the last image from the training set and use it as the first image in the test set
 # Perform auto-regressive prediction on the using the model output as the next input
 
@@ -43,6 +46,14 @@ for i in range(test_len):
     pred = model(img)
     predictions[i] = pred.detach().cpu().numpy()
     last_img = pred.detach().cpu().numpy()
+
+# Calculate the NRMSE, PSNR and SSIM for the predictions and ground truth
+nrmse, psnr, ssim = [], [], []
+for i in range(test_len):
+    nrmse.append(normalized_root_mse(predictions[i], ground_truth[i]))
+    psnr.append(peak_signal_noise_ratio(predictions[i], ground_truth[i]))
+    ssim.append(structural_similarity(predictions[i], ground_truth[i]))
+
     
 # Plot the predictions on first 10 images and the ground truth
 c = 10
@@ -51,7 +62,8 @@ plt.suptitle('Predictions vs Ground Truth')
 for i in range(1, c+1):
     plt.subplot(2, c, i+1)
     plt.imshow(predictions[i][0])
+    plt.title(f'SSIM: {ssim[i]:.3f}')
     plt.subplot(2, c, i+1+c)
     plt.imshow(ground_truth[i][0])
-    
-# Calculate the NRMSE, PSNR and SSIM for the predictions and ground truth
+
+plt.show()
