@@ -21,14 +21,8 @@ sawa_testloader = DataLoader(sawa_train, batch_size=1, shuffle=False)
 epochs = 10
 learning_rate = 1e-3
 
-model = monai.networks.nets.UNet(
-    spatial_dims=2,
-    in_channels=1,
-    out_channels=1,
-    channels=(8, 16, 32, 64),
-    strides=(2, 2, 2),
-    num_res_units=2,
-)
+from src.model import get_model
+model = get_model()
 
 mse_loss = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
@@ -63,7 +57,10 @@ for epoch in range(epochs):
     
     
     scheduler.step()
-    
-    
+
+# Save the model checkpoint 
+model_name = 'base_unet'
+torch.save(model.state_dict(), f'artifacts/{model_name}.pth')
+
 # Timing
 print(f'Time elapsed: {time.time() - start:.2f} seconds')
