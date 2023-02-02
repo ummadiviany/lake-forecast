@@ -13,7 +13,7 @@ def get_nearest_multiple(num:int, multiple:int) -> int:
     return upper if (upper - num) <= (num - lower) else lower
 
 class LakeDataset(Dataset):
-    def __init__(self, dataset_name, transforms=None, resize_dims=None, train=True):
+    def __init__(self, dataset_name, img_transforms=None, label_transfroms=None, resize_dims=None, train=True):
         
         self.transforms = transforms
         self.resize_dims = resize_dims
@@ -32,9 +32,12 @@ class LakeDataset(Dataset):
         if self.resize_dims:
             img = torchvision.transforms.functional.resize(img, self.resize_dims)
             label = torchvision.transforms.functional.resize(label, self.resize_dims)
-        if self.transforms:
+            
+        if self.img_transforms:
             img = self.transforms(img)
+        if self.label_transfroms:
             label = self.transforms(label)
+            
         return img/255, label/255
     
     
@@ -43,7 +46,7 @@ if __name__ == '__main__':
     # C, H, W
     resize_dims = (get_nearest_multiple(419, 16), get_nearest_multiple(385, 16))
     print(f'resize_dims: {resize_dims}')
-    sawa = LakeDataset('sawa', resize_dims=resize_dims)
+    sawa = LakeDataset('sawa', resize_dims=resize_dims, )
     
     img0, label0 = sawa[0]
     print(f'img0.shape: {img0.shape}')

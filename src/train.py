@@ -5,14 +5,22 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset
 from glob import glob
 from skimage.metrics import *
+torch.manual_seed(2000)
 
 # Timing
 start = time.time()
 
 # Dataloader
+train_transforms = transforms.Compose(
+    [
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.5),
+        # transforms.GaussianBlur(kernel_size=3)
+    ]
+)
 from src.dataloader import LakeDataset, get_nearest_multiple
 resize_dims = (get_nearest_multiple(419, 16), get_nearest_multiple(385, 16))
-sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=True)
+sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=True, img_transforms=train_transforms, label_transforms=train_transforms)
 sawa_trainloader = DataLoader(sawa_train, batch_size=1, shuffle=True)
 sawa_test = LakeDataset('sawa', resize_dims=resize_dims, train=False)
 sawa_testloader = DataLoader(sawa_train, batch_size=1, shuffle=False)
@@ -20,9 +28,10 @@ sawa_testloader = DataLoader(sawa_train, batch_size=1, shuffle=False)
 # Hyperparameters
 epochs = 10
 learning_rate = 1e-3
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 from src.model import get_model
-model = get_model()
+model = get_model().to(device)
 
 mse_loss = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
@@ -32,7 +41,7 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_ma
 for epoch in range(epochs):
     for i, (imgs, labels) in enumerate(sawa_trainloader):
         optimizer.zero_grad()
-        outputs = model(imgs)
+        outputs = model(imgs.to(device))
         loss = mse_loss(outputs, labels)
         loss.backward()
         optimizer.step()
