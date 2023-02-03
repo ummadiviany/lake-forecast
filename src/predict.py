@@ -5,6 +5,8 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset
 from glob import glob
 from skimage.metrics import *
+from monai.inferers import sliding_window_inference
+torch.manual_seed(2000)
 
 # Timing
 start = time.time()
@@ -13,8 +15,8 @@ start = time.time()
 # Perform auto-regressive prediction on the using the model output as the next input
 
 from src.dataloader import LakeDataset, get_nearest_multiple
-resize_dims = (get_nearest_multiple(419, 16), get_nearest_multiple(385, 16))
-sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=True)
+resize_dims = (get_nearest_multiple(419, 32), get_nearest_multiple(385, 32))
+sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=False)
 
 last_img = sawa_train[-1][0]
 # print(f'last_img.shape: {last_img.shape}, dtype: {last_img.dtype}')
@@ -38,13 +40,15 @@ from src.model import get_model
 model = get_model().to(device)
 
 # Load the model weights
-model_name = 'base_unet_mse_25'
+model_name = 'unet_sawa_patch_sli'
 model.load_state_dict(torch.load(f'artifacts/models/{model_name}.pth', map_location=device))
 
 # Pass the last image to the model and get the predictions
 for i in range(test_len):
     img = torch.unsqueeze(last_img, dim=0).to(device)
-    pred = model(img)
+    # pred = model(img)
+    pred = sliding_window_inference(inputs=img.to(device), roi_size=(160, 160), sw_batch_size=4,
+                                                predictor=model, overlap = 0.5, mode = 'gaussian', device=device)
     predictions[i] = pred.clip(0, 1)
     last_img = predictions[i]
 
@@ -73,4 +77,5 @@ for i in range(1, c+1):
     
 plt.tight_layout()
 plt.savefig(f'artifacts/predictions/{model_name}.png')
+print(f'Predictions saved sucessfully at artifacts/predictions/{model_name}.png')
 # plt.show()
