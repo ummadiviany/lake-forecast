@@ -38,8 +38,8 @@ from src.model import get_model
 model = get_model().to(device)
 
 # Load the model weights
-model_name = 'base_unet_da_mse'
-model.load_state_dict(torch.load(f'artifacts/models/{model_name}.pth'))
+model_name = 'base_unet_mse_25'
+model.load_state_dict(torch.load(f'artifacts/models/{model_name}.pth', map_location=device))
 
 # Pass the last image to the model and get the predictions
 for i in range(test_len):

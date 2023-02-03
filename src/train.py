@@ -69,7 +69,7 @@ for epoch in range(epochs):
 
 # Save the model checkpoint 
 model_name = 'base_unet'
-torch.save(model.state_dict(), f'artifacts/{model_name}.pth')
+torch.save(model.state_dict(), f'artifacts/models/{model_name}.pth')
 
 # Timing
 print(f'Time elapsed: {time.time() - start:.2f} seconds')
