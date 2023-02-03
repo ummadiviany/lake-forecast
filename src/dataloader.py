@@ -27,7 +27,7 @@ class LakeDataset(Dataset):
         print(f'Loaded {len(self.files)} images from {dataset_path} dataset')
         
     def __len__(self):
-        return len(self.files) - 3
+        return len(self.files) - 1
     
     def img_label_transform(self, image, label):
         # Resize
@@ -44,12 +44,9 @@ class LakeDataset(Dataset):
         return image, label
 
     def __getitem__(self, idx):
-        img1 = torchvision.io.read_image(self.files[idx], mode=torchvision.io.ImageReadMode.GRAY)
-        img2 = torchvision.io.read_image(self.files[idx+1], mode=torchvision.io.ImageReadMode.GRAY)
-        img3 = torchvision.io.read_image(self.files[idx+2], mode=torchvision.io.ImageReadMode.GRAY)
+        img = torchvision.io.read_image(self.files[idx], mode=torchvision.io.ImageReadMode.GRAY)
         label = torchvision.io.read_image(self.files[idx+3], mode=torchvision.io.ImageReadMode.GRAY)
-        images = torch.cat([img1, img2, img3], dim=0)
-
+        
         # if self.resize_dims:
         #     img = torchvision.transforms.functional.resize(img, self.resize_dims)
         #     label = torchvision.transforms.functional.resize(label, self.resize_dims)
