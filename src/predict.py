@@ -72,4 +72,5 @@ for i in range(1, c+1):
     plt.axis('off')
     
 plt.tight_layout()
-plt.show()
+plt.savefig(f'artifacts/predictions/{model_name}.png')
+# plt.show()

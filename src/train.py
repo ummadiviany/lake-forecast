@@ -20,7 +20,7 @@ train_transforms = transforms.Compose(
 )
 from src.dataloader import LakeDataset, get_nearest_multiple
 resize_dims = (get_nearest_multiple(419, 16), get_nearest_multiple(385, 16))
-sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=True, img_transforms=train_transforms, label_transforms=train_transforms)
+sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=True)
 sawa_trainloader = DataLoader(sawa_train, batch_size=1, shuffle=True)
 sawa_test = LakeDataset('sawa', resize_dims=resize_dims, train=False)
 sawa_testloader = DataLoader(sawa_train, batch_size=1, shuffle=False)
