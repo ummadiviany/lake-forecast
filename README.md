@@ -3,7 +3,7 @@ This repository contains code base for Satelite Time Series Imagery based Lake F
 ## Installation
 
 ```bash
-pip install -r reqs.txt
+pip install -r -q reqs.txt 
 ```
 ### Requirements
 
