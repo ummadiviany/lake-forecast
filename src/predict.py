@@ -16,13 +16,13 @@ start = time.time()
 
 from src.dataloader import LakeDataset, get_nearest_multiple
 resize_dims = (get_nearest_multiple(419, 32), get_nearest_multiple(385, 32))
-sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=False)
+sawa_train = LakeDataset('sawa/train', resize_dims=resize_dims, train=False)
 
 last_img = sawa_train[-1][0]
 # print(f'last_img.shape: {last_img.shape}, dtype: {last_img.dtype}')
 
 # Get the length of the test set
-sawa_test = LakeDataset('sawa', resize_dims=resize_dims, train=False)
+sawa_test = LakeDataset('sawa/test', resize_dims=resize_dims, train=False)
 test_len = len(sawa_test)
 
 # Create a empty arrays to store the predictions and ground truth

@@ -45,7 +45,7 @@ class LakeDataset(Dataset):
 
     def __getitem__(self, idx):
         img = torchvision.io.read_image(self.files[idx], mode=torchvision.io.ImageReadMode.GRAY)
-        label = torchvision.io.read_image(self.files[idx+3], mode=torchvision.io.ImageReadMode.GRAY)
+        label = torchvision.io.read_image(self.files[idx+1], mode=torchvision.io.ImageReadMode.GRAY)
         
         # if self.resize_dims:
         #     img = torchvision.transforms.functional.resize(img, self.resize_dims)
@@ -57,7 +57,7 @@ class LakeDataset(Dataset):
         # if self.label_transfroms:
         #     label = self.label_transfroms(label)
 
-        img, label = self.img_label_transform(images, label)
+        img, label = self.img_label_transform(img, label)
             
         return img/255, label/255
     

@@ -29,10 +29,11 @@ img_transforms = transforms.Compose(
     ]
 )
 from src.dataloader import LakeDataset, get_nearest_multiple
+# Spatial dims : H x W
 resize_dims = (get_nearest_multiple(419, 32), get_nearest_multiple(385, 32))
-sawa_train = LakeDataset('sawa', resize_dims=resize_dims, train=True)
+sawa_train = LakeDataset('sawa/train', resize_dims=resize_dims, train=True)
 sawa_trainloader = DataLoader(sawa_train, batch_size=batch_size, shuffle=True)
-sawa_test = LakeDataset('sawa', resize_dims=resize_dims, train=False)
+sawa_test = LakeDataset('sawa/test', resize_dims=resize_dims, train=False)
 sawa_testloader = DataLoader(sawa_test, batch_size=1, shuffle=False)
 
 if wandb_log:
@@ -43,7 +44,7 @@ if wandb_log:
         'batch_size' : batch_size,
     }
     wandb.login()
-    wandb.init(project="lake_forecast", entity="vinayu", config = config)
+    wandb.init(project="lake_forecast", config = config)
 
 from src.model import get_model
 model = get_model().to(device)
