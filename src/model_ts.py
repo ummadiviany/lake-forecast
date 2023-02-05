@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 # from Seq2Seq import Seq2Seq
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 monai.utils.set_determinism(2000)
+from src.dataloader_ts import get_nearest_multiple
 
 def get_model():
     # model = monai.networks.nets.UNet(
@@ -18,7 +18,7 @@ def get_model():
     # )
     model = Seq2Seq(num_channels=1, num_kernels=8, 
     kernel_size=(3, 3), padding=(1, 1), activation="relu", 
-    frame_size=(416, 384), num_layers=3).to(device)
+    frame_size=(get_nearest_multiple(140, 16), get_nearest_multiple(129, 16)), num_layers=3).to(device)
     return model
 
 

@@ -37,11 +37,11 @@ class LakeDataset(Dataset):
         images = [resize(image) for image in images]
         label = resize(label)
 
-        if self.train:
-            # Random crop
-            i, j, h, w = transforms.RandomCrop.get_params(label, output_size=(160, 160))
-            images = [TF.crop(image, i, j, h, w) for image in images]
-            label = TF.crop(label, i, j, h, w)
+        # if self.train:
+        #     # Random crop
+        #     i, j, h, w = transforms.RandomCrop.get_params(label, output_size=(160, 160))
+        #     images = [TF.crop(image, i, j, h, w) for image in images]
+        #     label = TF.crop(label, i, j, h, w)
 
         return images, label
 
@@ -69,21 +69,21 @@ class LakeDataset(Dataset):
 if __name__ == '__main__':
     
     # C, H, W
-    resize_dims = (get_nearest_multiple(419, 16), get_nearest_multiple(385, 16))
+    resize_dims = (get_nearest_multiple(140, 16), get_nearest_multiple(129, 16))
     print(f'resize_dims: {resize_dims}')
     
-    sawa = LakeDataset('sawa/train', resize_dims=resize_dims, train=True, time_steps=5)
-    loader = DataLoader(sawa, batch_size=2, shuffle=False)
+    # sawa = LakeDataset('sawa/train', resize_dims=resize_dims, train=True, time_steps=5)
+    # loader = DataLoader(sawa, batch_size=2, shuffle=False)
     
-    # for img, label in enumerate(loader):
-    #     print()
-    # img0, label0 = next(iter(loader))
-    # print(f'img0.shape: {img0.shape}')
-    # print(f'label0.shape: {label0.shape}')
-    # print(f"Min: {torch.min(img0)}, Max: {torch.max(img0)}")
+    # # for img, label in enumerate(loader):
+    # #     print()
+    # # img0, label0 = next(iter(loader))
+    # # print(f'img0.shape: {img0.shape}')
+    # # print(f'label0.shape: {label0.shape}')
+    # # print(f"Min: {torch.min(img0)}, Max: {torch.max(img0)}")
     
-    for i, (img, label) in enumerate(loader):
-        print(f'Step {i}, img.shape: {img.shape}, label.shape: {label.shape}')
+    # for i, (img, label) in enumerate(loader):
+    #     print(f'Step {i}, img.shape: {img.shape}, label.shape: {label.shape}')
     
     # plt.figure(figsize= (4*2, 1*2))
     # plt.subplot(1, 4, 1)
