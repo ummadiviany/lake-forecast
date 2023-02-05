@@ -29,7 +29,7 @@ class LakeDataset(Dataset):
         print(f'Loaded {len(self.files)} images from {dataset_path} dataset')
         
     def __len__(self):
-        return len(self.files) - self.time_steps
+        return len(self.files) - self.time_steps - 1
     
     def img_label_transform(self, images, label):
         # Resize
@@ -51,21 +51,9 @@ class LakeDataset(Dataset):
         ]
         images = torch.stack(images, dim=0)
         label = torchvision.io.read_image(self.files[idx+self.time_steps+1], mode=torchvision.io.ImageReadMode.GRAY)
-        
-        # print(f'images.shape: {images.shape}')
-        # print(f'label.shape: {label.shape}')
-        
-        # if self.resize_dims:
-        #     img = torchvision.transforms.functional.resize(img, self.resize_dims)
-        #     label = torchvision.transforms.functional.resize(label, self.resize_dims)
             
-        
-        # if self.img_transforms:
-        #     img = self.img_transforms(img)
-        # if self.label_transfroms:
-        #     label = self.label_transfroms(label)
 
-        # images, label = self.img_label_transform(images, label)
+        images, label = self.img_label_transform(images, label)
         images = rearrange(images, 't c h w -> c t h w')
         label = rearrange(label, 'c h w -> c 1 h w')
             
@@ -85,15 +73,17 @@ if __name__ == '__main__':
     print(f'resize_dims: {resize_dims}')
     
     sawa = LakeDataset('sawa/train', resize_dims=resize_dims, train=True, time_steps=5)
-    loader = DataLoader(sawa, batch_size=1, shuffle=False)
+    loader = DataLoader(sawa, batch_size=2, shuffle=False)
     
     # for img, label in enumerate(loader):
     #     print()
-    img0, label0 = sawa[0]
-    print(f'img0.shape: {img0.shape}')
-    print(f'label0.shape: {label0.shape}')
-    print(f"Min: {torch.min(img0)}, Max: {torch.max(img0)}")
+    # img0, label0 = next(iter(loader))
+    # print(f'img0.shape: {img0.shape}')
+    # print(f'label0.shape: {label0.shape}')
+    # print(f"Min: {torch.min(img0)}, Max: {torch.max(img0)}")
     
+    for i, (img, label) in enumerate(loader):
+        print(f'Step {i}, img.shape: {img.shape}, label.shape: {label.shape}')
     
     # plt.figure(figsize= (4*2, 1*2))
     # plt.subplot(1, 4, 1)

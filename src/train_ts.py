@@ -1,4 +1,5 @@
 import torch, os, time, torch, monai, torchvision, wandb
+from torchvision.utils import make_grid
 import numpy as np, matplotlib.pyplot as plt
 import torch.nn as nn
 from torchvision import transforms
@@ -17,7 +18,7 @@ wandb_log = True
 epochs = 100
 learning_rate = 1e-3
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-batch_size = 4
+batch_size = 1
 
 # Dataloader
 img_transforms = transforms.Compose(
@@ -59,12 +60,13 @@ for epoch in range(epochs):
     model.train()
     for i, (imgs, labels) in enumerate(sawa_trainloader):
         optimizer.zero_grad()
+        # print('training :',imgs.shape,labels.shape)
         outputs = model(imgs.to(device))
         # loss = mse_loss(outputs, labels.to(device))
-        loss = mae_loss(outputs, labels.to(device))
+        loss = mae_loss(outputs.unsqueeze(1), labels.to(device))
         loss.backward()
         optimizer.step()
-        
+        # break
         if i % 50 == 0:
             print(f'Epoch {epoch+1}/{epochs}, Step {i+1}/{len(sawa_trainloader)}, Loss: {loss.item():.4f}')
             
@@ -76,12 +78,13 @@ for epoch in range(epochs):
         test_len = len(sawa_testloader)
         
         img_stack, out_stack, label_stack  = [], [], []
-        
+
         for i, (imgs, labels) in enumerate(sawa_testloader):
-            # outputs = model(imgs.to(device))
-            outputs = sliding_window_inference(inputs=imgs.to(device), roi_size=(160, 160), sw_batch_size=4,
-                                                predictor=model, overlap = 0.5, mode = 'gaussian', device=device)
-            outputs.clip(0,1)
+            outputs = model(imgs.to(device))
+            # outputs = sliding_window_inference(inputs=imgs.to(device), roi_size=(160, 160), sw_batch_size=4,
+                                                # predictor=model, overlap = 0.5, mode = 'gaussian', device=device)
+            outputs=outputs.clip(0,1).unsqueeze(1)
+            # print(f'output shape {outputs.shape} and labels shape is {labels.shape}')
             loss += mae_loss(outputs, labels.to(device))
             
             nrmse += normalized_root_mse(labels.detach().cpu().numpy(), outputs.detach().cpu().numpy())
@@ -100,16 +103,34 @@ for epoch in range(epochs):
             'psnr_n' : psnr,   'ssim_n' : ssim 
         })
 
+        # print(f'img_stack : {img_stack[0].shape,len(img_stack)} label_stack : {label_stack[0].shape,len(label_stack)} out_stack: {out_stack[0].shape,len(label_stack)}')
+
+        # print(f'torch.cat(img_stack, dim=0):{torch.cat(img_stack, dim=0).shape} ,torch.cat(label_stack, dim=0):{torch.cat(label_stack, dim=0).shape},torch.cat(out_stack, dim=0):{torch.cat(out_stack, dim=0).shape}')
         
+        # imgs :  1, 1, 3, 416, 384
+        # label : B 1 1 H W
+        # pred :  B 1 1 H W
         if epoch % 10 == 0:
-            img_grid = torchvision.utils.make_grid(
-                torch.cat([torch.cat(img_stack, dim=0), torch.cat(label_stack, dim=0), torch.cat(out_stack, dim=0)], dim = 3) , nrow =2, padding = 20, pad_value = 1
-            )
-            images = wandb.Image(transforms.ToPILImage()(img_grid.cpu()), caption="Left: Input, Middle : Ground Truth, Right: Prediction")
-            wandb.log({f"Test Predictions": images, "epoch" : epoch})
-            print(f'Logged predictions to wandb')
+
+          img_stack = torch.cat(img_stack, dim=0)
+          label_stack = torch.cat(label_stack, dim=0).squeeze(dim=1)
+          out_stack = torch.cat(out_stack, dim=0).squeeze(dim=1)
+        
+          
+          img0_stack = img_stack[:,:,0]
+          img1_stack = img_stack[:,:,1]
+          img2_stack = img_stack[:,:,2]
+        
+          f = make_grid(
+            torch.cat(
+              [img0_stack, img1_stack, img2_stack, label_stack, out_stack], dim=3
+            ), nrow=1, padding=15, pad_value=1
+          )
+          images = wandb.Image(f, caption="First three : Input, Fourth : Ground Truth, Last: Prediction")
+          wandb.log({f"Test Predictions": images, "epoch" : epoch})
+          print(f'Logged predictions to wandb')
     
-    
+    # break
     scheduler.step()
 
 # Save the model checkpoint 
