@@ -50,7 +50,7 @@ class LakeDataset(Dataset):
             torchvision.io.read_image(self.files[idx+i], mode=torchvision.io.ImageReadMode.GRAY) for i in range(self.time_steps)
         ]
         images = torch.stack(images, dim=0)
-        label = torchvision.io.read_image(self.files[idx+self.time_steps+1], mode=torchvision.io.ImageReadMode.GRAY)
+        label = torchvision.io.read_image(self.files[idx+self.time_steps], mode=torchvision.io.ImageReadMode.GRAY)
             
 
         images, label = self.img_label_transform(images, label)

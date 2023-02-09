@@ -14,7 +14,7 @@ torch.manual_seed(2000)
 start = time.time()
 
 # Hyperparameters
-wandb_log = True
+wandb_log = False
 epochs = 100
 learning_rate = 1e-3
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -98,10 +98,11 @@ for epoch in range(epochs):
         ssim /= test_len
         print(f'Epoch {epoch+1}/{epochs}, Test Loss: {loss/len(sawa_testloader):.4f}, NRMSE: {nrmse:.4f}, PSNR: {psnr:.4f}, SSIM: {ssim:.4f}')
 
-        wandb.log({
-            'epoch' : epoch, 'nrmse_n' : nrmse,
-            'psnr_n' : psnr,   'ssim_n' : ssim 
-        })
+        if wandb_log:
+            wandb.log({
+                'epoch' : epoch, 'nrmse_n' : nrmse,
+                'psnr_n' : psnr,   'ssim_n' : ssim 
+            })
 
         # print(f'img_stack : {img_stack[0].shape,len(img_stack)} label_stack : {label_stack[0].shape,len(label_stack)} out_stack: {out_stack[0].shape,len(label_stack)}')
 
@@ -110,7 +111,7 @@ for epoch in range(epochs):
         # imgs :  1, 1, 3, 416, 384
         # label : B 1 1 H W
         # pred :  B 1 1 H W
-        if epoch % 10 == 0:
+        if epoch % 10 == 0 and wandb_log:
 
           img_stack = torch.cat(img_stack, dim=0)
           label_stack = torch.cat(label_stack, dim=0).squeeze(dim=1)

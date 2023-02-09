@@ -1,9 +1,6 @@
-import monai
 import torch
 import torch.nn as nn
-# from Seq2Seq import Seq2Seq
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-monai.utils.set_determinism(2000)
 from src.dataloader_ts import get_nearest_multiple
 
 def get_model():
@@ -20,10 +17,6 @@ def get_model():
     kernel_size=(3, 3), padding=(1, 1), activation="relu", 
     frame_size=(get_nearest_multiple(140, 16), get_nearest_multiple(129, 16)), num_layers=3).to(device)
     return model
-
-
-
-
 
 
 
@@ -114,8 +107,6 @@ class ConvLSTMCell(nn.Module):
         H = output_gate * self.activation(C)
 
         return H, C
-import torch.nn as nn
-import torch
 
 
 class Seq2Seq(nn.Module):
@@ -167,4 +158,12 @@ class Seq2Seq(nn.Module):
         output = self.conv(output[:,:,-1])
         
         return nn.Sigmoid()(output)
-
+    
+    
+if __name__ == "__main__":
+    model = get_model()
+    x = torch.randn(1, 1, 10, 160, 160)
+    print(f'Input shape: {x.shape}')
+    y = model(x)
+    print(f'Output shape: {y.shape}')
+    
